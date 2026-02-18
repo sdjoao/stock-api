@@ -21,6 +21,11 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
+    // método privado para encontrar e retornar o produto para os demais métodos.
+    public Product findProductById(Long id){
+        return productRepository.findById(id).orElseThrow(() -> new BusinessException("Produto de ID " + id + " não encontrado."));
+    }
+
     private boolean productIsValid(ProductRequestDTO request){
         if(request.name() == null || request.name().isBlank()){
             throw new BusinessException("Nome do produto vazio ou inválido.");
@@ -44,10 +49,6 @@ public class ProductService {
         return ProductMapper.conversor(product);
     }
 
-    private Product findProductById(Long id){
-        return productRepository.findById(id).orElseThrow(() -> new BusinessException("Produto de ID " + id + " não encontrado."));
-    }
-
     public List<ProductResponseDTO> getProducts(){
         return ProductMapper.listConversor(productRepository.findAll());
     }
@@ -68,4 +69,5 @@ public class ProductService {
     public void deleteProduct(Long id){
         productRepository.delete(findProductById(id));
     }
+
 }
