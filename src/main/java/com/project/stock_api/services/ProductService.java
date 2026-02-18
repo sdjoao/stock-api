@@ -26,6 +26,11 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(() -> new BusinessException("Produto de ID " + id + " não encontrado."));
     }
 
+    public void updateProductQuantity(Long id, float quantity){
+        Product product = findProductById(id);
+        product.setQuantity(quantity);
+    }
+
     private boolean productIsValid(ProductRequestDTO request){
         if(request.name() == null || request.name().isBlank()){
             throw new BusinessException("Nome do produto vazio ou inválido.");

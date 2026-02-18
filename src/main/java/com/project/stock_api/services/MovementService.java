@@ -1,6 +1,7 @@
 package com.project.stock_api.services;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class MovementService {
         return movementRepository.findById(id).orElseThrow(() -> new BusinessException("Movimento com ID " + id + " não encontrado."));
     }
 
+    // método privado que verifica os campos da requisição.
     private boolean movementIsValid(MovementRequestDTO request){
         if(request.quantity() <= 0){
             throw new BusinessException("Movimento inválido, quantidade não pode ser zero ou negativa.");
@@ -42,6 +44,23 @@ public class MovementService {
         return true;
     } 
 
+    public float getProductQuantity(MovementRequestDTO request){
+        List<MovementResponseDTO> dtos = getMovementsByProduct(request);
+        float inMovement = 0;
+        float outMovement = 0;
+        float actualQuantity = 0;
+        for(MovementResponseDTO movement : dtos){
+            if(movement.type().equals(MovementType.IN)){
+                inMovement += movement.quantity();
+            }
+            if(movement.type().equals(MovementType.OUT)){
+                outMovement += movement.quantity();
+            }
+        }
+        actualQuantity = inMovement - outMovement;
+        return actualQuantity;
+    }
+
     public MovementResponseDTO createMovement(MovementRequestDTO requestDTO){
         movementIsValid(requestDTO);
         Movement movement = new Movement();
@@ -50,6 +69,7 @@ public class MovementService {
         movement.setQuantity(requestDTO.quantity());
         movement.setType(requestDTO.type());
         movementRepository.save(movement);
+        productService.updateProductQuantity(requestDTO.product_id(), getProductQuantity(requestDTO));
         return MovementMapper.conversor(movement);
     }
 
@@ -59,6 +79,11 @@ public class MovementService {
 
     public List<MovementResponseDTO> getMovementsByDate(LocalDate start, LocalDate end){
         return MovementMapper.listConversor(movementRepository.findMovementDateBetween(start, end));
+    }
+
+    public List<MovementResponseDTO> getMovementsByProduct(MovementRequestDTO request){
+        Product product = productService.findProductById(request.product_id());
+        return MovementMapper.listConversor(movementRepository.findMovementByProduct(product));
     }
 
 }
