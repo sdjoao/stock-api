@@ -29,6 +29,7 @@ public class ProductService {
     public void updateProductQuantity(Long id, float quantity){
         Product product = findProductById(id);
         product.setQuantity(quantity);
+        productRepository.save(product);
     }
 
     private boolean productIsValid(ProductRequestDTO request){

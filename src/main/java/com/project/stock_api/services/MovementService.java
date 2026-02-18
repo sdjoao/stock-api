@@ -38,7 +38,7 @@ public class MovementService {
             throw new BusinessException("Movimento inválido, quantidade não pode ser zero ou negativa.");
         }
         ProductResponseDTO dto = productService.getProductById(request.product_id());
-        if(request.type().equals(MovementType.OUT) || request.quantity() > dto.quantity()){
+        if(request.type().equals(MovementType.OUT) && request.quantity() > dto.quantity()){
             throw new BusinessException("Movimento inválido, quantidade solicitada deixará o estoque negativo.");
         }
         return true;
@@ -78,7 +78,7 @@ public class MovementService {
     }
 
     public List<MovementResponseDTO> getMovementsByDate(LocalDate start, LocalDate end){
-        return MovementMapper.listConversor(movementRepository.findMovementDateBetween(start, end));
+        return MovementMapper.listConversor(movementRepository.findByMovementDateBetween(start, end));
     }
 
     public List<MovementResponseDTO> getMovementsByProduct(MovementRequestDTO request){
