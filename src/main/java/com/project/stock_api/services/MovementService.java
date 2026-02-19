@@ -1,11 +1,13 @@
 package com.project.stock_api.services;
 
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.project.stock_api.dto.MovementReportDTO;
 import com.project.stock_api.dto.MovementRequestDTO;
 import com.project.stock_api.dto.MovementResponseDTO;
 import com.project.stock_api.dto.ProductResponseDTO;
@@ -84,6 +86,23 @@ public class MovementService {
     public List<MovementResponseDTO> getMovementsByProduct(MovementRequestDTO request){
         Product product = productService.findProductById(request.product_id());
         return MovementMapper.listConversor(movementRepository.findMovementByProduct(product));
+    }
+
+    // relatório de movimentos de estoque
+    public List<MovementReportDTO> getMovementReportData(){
+        return movementRepository.findAll()
+            .stream()
+            .map(movement ->  new MovementReportDTO(
+                    movement.getId(),
+                    movement.getProduct().getName(),
+                    movement.getQuantity(),
+                    movement.getType().name(),
+                    Date.from(movement.getMovementDate()
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                ))
+            )
+            .toList();
     }
 
 }

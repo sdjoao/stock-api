@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.project.stock_api.dto.ProductReportDTO;
 import com.project.stock_api.dto.ProductRequestDTO;
 import com.project.stock_api.dto.ProductResponseDTO;
 import com.project.stock_api.entity.Product;
@@ -76,4 +77,17 @@ public class ProductService {
         productRepository.delete(findProductById(id));
     }
 
+    // relatório de produtos
+    public List<ProductReportDTO> getProductReportData(){
+        return productRepository.findAll()
+            .stream()
+            .map(product ->  new ProductReportDTO(
+                    product.getName(),
+                    product.getDescription(),
+                    product.getPrice(),
+                    product.getQuantity(),
+                    product.getPrice().multiply(BigDecimal.valueOf(product.getQuantity()))
+            ))
+            .toList();
+    }
 }
